@@ -11,6 +11,12 @@ module UART_top_tb;
     wire [7:0] data_out;
     wire tx_clk_en,rx_clk_en,tx_line;
     reg [7:0] count;
+    wire error;
+    
+    
+    reg start_time , end_time;
+    
+    
     uart_top dut(
         .clk(clk),
         .rst(rst),
@@ -22,7 +28,8 @@ module UART_top_tb;
         .data_out(data_out),
         .tx_clk_en(tx_clk_en),
         .rx_clk_en(rx_clk_en),
-        .tx_line(tx_line)
+        .tx_line(tx_line),
+        .error(error)
     );
     initial begin
         clk     = 0;
@@ -56,16 +63,22 @@ module UART_top_tb;
         wr_en=1'b0;
         #200;
         
-        for(integer i = 0; i <= 100; i = i + 1) begin
+        for(integer i = 99; i <= 170; i = i + 1) begin
+         //  $display("execution start : start_time =%0t ns",$time) ;
             send_byte(i[7:0]);
             count=i;
             wait(rdy);
-            $display("sent = %0d   received = %0d", count, data_out);
+            $display("sent = %0d   received = %0d   Error : %b \n\n", count, data_out,error);
+            
             clear_ready;
             wait(!busy); 
-            #100; 
+             #3000; 
+          //  $display("end_time = %0t ns " ,$time);
+            
+            
         end      
         #10000;
         $finish;
     end
 endmodule
+;

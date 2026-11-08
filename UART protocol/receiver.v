@@ -7,11 +7,11 @@ module uart_receiver(
     input  wire       rdy_clr,
     input  wire       clk_en,       //rx_enable pin from braud rate generator  
     output reg        rdy,
-    output reg [7:0]  data_out
+    output reg [7:0]  data_out,
+    output reg  parity_error
 );
 
 reg parity_check=1'b0;
-reg parity_error=1'b0;
 
     localparam start_state = 2'b00;
     localparam data_state  = 2'b01;
@@ -19,7 +19,7 @@ reg parity_error=1'b0;
 
     reg [1:0] state;
     reg [3:0] sample;
-    reg [2:0] index;
+    reg [3:0] index;
     reg [7:0] temp_register;
 
     always @(posedge clk) begin
@@ -38,40 +38,41 @@ reg parity_error=1'b0;
             if(clk_en) begin
                 case(state)
                     start_state: begin
-                        if(rx == 1'b0 || sample != 4'b0) begin
-                            if(sample == 4'h7) begin 
-                                if(rx == 1'b0) begin
+                       
+                           
+                         
+                             if(rx == 1'b0) begin
+                                sample <= 4'b0;
+                                
                                     state  <= data_state;
-                                    sample <= 4'b0;
                                     index  <= 3'b0;
-                                end else begin
-                                    state  <= start_state;
-                                    sample <= 4'b0;
+                             end   
+                                
+                             
+                            else begin
+                                state<=start_state;
+                            
                                 end
-                            end else begin
-                                sample <= sample + 1'b1;
-                            end
                         end
-                    end
-
+                    
                     data_state: begin
                         if(sample == 4'hF) begin
                             sample<= 4'b0;
-                            if(index == 3'h7) begin
+                            if(index == 4'h8) begin
                                 if(parity_check==1'b1)
                                 begin
                                 state <= stop_state;
                                 parity_check<=1'b0;
-                                end
+                                end   
                                 else begin
                                     parity_error=(^temp_register) ^ rx ;
-                                    $display("temp : %b , parity : %b , Error : %b",^temp_register,rx,parity_error);
+                                   // $display("temp : %b , parity : %b , Error : %b",^temp_register,rx,parity_error);
                                     parity_check<=1'b1;
-                                    
+                                     end
                                 end
-                            end else begin
+                              else begin
                                 temp_register[index] <= rx;
-                                $display("rx : %b",rx);
+                                $display(" BIT = %d ,rx : %b",index,rx);
                                 index <= index + 1'b1;
                             end
                         end else begin
@@ -86,6 +87,9 @@ reg parity_error=1'b0;
                             if(rx == 1'b1) begin 
                                 data_out <= temp_register;
                                 rdy      <= 1'b1;
+                               
+                                $display("Transmission End");
+                                
                             end
                         end else begin
                             sample <= sample + 1'b1;

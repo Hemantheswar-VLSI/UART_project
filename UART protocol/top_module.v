@@ -1,5 +1,5 @@
 
-module uart_top (
+    module uart_top (
     input  wire       clk,
     input  wire       rst,
     input  wire [7:0] data_in,
@@ -10,7 +10,8 @@ module uart_top (
     output wire [7:0] data_out,
      output wire tx_clk_en,
    output wire rx_clk_en,
-     output wire tx_line
+     output wire tx_line,
+     output wire error
 );
 
    
@@ -42,6 +43,7 @@ module uart_top (
         .rdy_clr(rdy_clr),
         .clk_en(rx_clk_en),
         .rdy(rdy),
-        .data_out(data_out)
+        .data_out(data_out),
+        .parity_error(error)
     );
 endmodule
