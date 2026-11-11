@@ -16,28 +16,43 @@ module baudrate_gen #(
 
     always @(posedge clock) begin
         if(reset) begin
-            counter_tx <= 0;
-            counter_rx <= 0;
-            enb_tx     <= 1'b0;
-            enb_rx     <= 1'b0;
-        end else begin
-            // TX counter
-            if(counter_tx == (DIV_TX - 1)) begin
+        
                 counter_tx <= 0;
-                enb_tx     <= 1'b1;
-            end else begin
+                counter_rx <= 0;
+                enb_tx     <= 1'b0;
+                enb_rx     <= 1'b0;
+                $display("frequency : %d , braud rate : %d",CLK_FREQ,BAUD_RATE);
+            end 
+        else begin
+            // TX counter
+           /* if(counter_tx == (DIV_TX -1)) begin
+                    counter_tx <= 0;
+                    enb_tx     <= 1'b1;
+                end 
+            else begin
                 counter_tx <= counter_tx + 1'b1;
                 enb_tx     <= 1'b0;
             end
-
+*/
             // RX counter
-            if(counter_rx == (DIV_RX - 1)) begin
-                counter_rx <= 0;
-                enb_rx     <= 1'b1;
-            end else begin
-                counter_rx <= counter_rx + 1'b1;
-                enb_rx     <= 1'b0;
-            end
+            if(counter_rx == (DIV_RX )) begin
+                    counter_rx <= 0;
+                    enb_rx     <= 1'b1;
+                    
+                    if(counter_tx==4'hf) begin
+                        enb_tx<=1'b1;
+                        counter_tx<=0;
+                    end
+                    else begin
+                        counter_tx<=counter_tx+1;
+                        enb_tx<=1'b0;
+                    end
+                end 
+            else begin
+                    counter_rx <= counter_rx + 1'b1;
+                    enb_rx     <= 1'b0;
+                    enb_tx<=1'b0;
+                end
         end
     end
 endmodule
