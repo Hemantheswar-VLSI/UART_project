@@ -28,7 +28,8 @@ reg  parity_bit=1'b0;
             state <= idle_state;
             index <= 3'b000;
             data  <= 8'b0;
-        end else begin
+            end 
+        else begin
             case(state)
                 idle_state: begin
                     tx <= 1'b1;
@@ -39,47 +40,62 @@ reg  parity_bit=1'b0;
                         index <= 3'b000;
                         tx    <= 1'b0; // Pull low immediately for start bit
                         $display("Transmission Start");
-                    end
+                        end
+                    else begin
+                        state<=idle_state;
+                        end
                 end
                 
                 start_state: begin
+                //$display("start_state , enable = %b",enb);
                     if(enb) begin
                         state <= data_state;
                         tx    <= data[index];
                         $display("Start BIT =%b",tx);
-                    end
+                        end
+                     else begin
+                        state<=start_state;
+                       // $display("start_state , enable = %b",enb);
+                        end
                 end
                 
                 data_state: begin
                     if(enb) begin
+                        
                         if(index == 3'h7) begin
                             if(parity_generation==1'b1)
-                            begin
-                            state <= stop_state;
-                            tx    <= 1'b1; // Drive stop bit high
-                             $display("Parity bit = %b",tx);
-                            parity_generation<=1'b0;
-                            end
-                            else begin
+                                begin
+                                state <= stop_state;
+                                tx    <= 1'b1; // Drive stop bit high
+                                $display("Parity bit = %b",tx);
+                                parity_generation<=1'b0;
+                                end
+                             else begin
                                 parity_bit=^data_in;
                            //    $display(" BIT = %d , Tx : %b ",index,tx);
                                 tx<=parity_bit;
                                 parity_generation<=1'b1;
-                            end
-                        end 
+                                end
+                           end 
                         else begin
                             index <= index + 1'b1;
                             tx    <= data[index + 1'b1];
                          //   $display(" BIT = %d , Tx : %b ",index,tx);
+                            end
+                       end
+                    else begin
+                        state<=data_state;
                         end
-                    end
                 end
                 
                 stop_state: begin
                     if(enb) begin
                         state <= idle_state;
                         $display("Stop bit : %b",tx);
-                    end
+                        end
+                    else begin
+                        state<=stop_state;  
+                        end
                 end
                 
                 default: begin

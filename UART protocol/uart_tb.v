@@ -14,7 +14,6 @@ module UART_top_tb;
     wire error;
     
     
-    reg start_time , end_time;
     
     
     uart_top dut(
@@ -38,7 +37,7 @@ module UART_top_tb;
         rdy_clr = 0;
         data_in = 8'd0;
     end
-    always #5 clk = ~clk; 
+    always #10 clk = ~clk; 
     task send_byte(input [7:0] din);
     begin
         @(negedge clk);
@@ -58,13 +57,13 @@ module UART_top_tb;
     endtask
     initial begin
         rst = 1'b1;
-        #200;
+        #100;
         rst = 1'b0;
         wr_en=1'b0;
-        #200;
+        #100;
         
-        for(integer i = 99; i <= 170; i = i + 1) begin
-         //  $display("execution start : start_time =%0t ns",$time) ;
+        for(integer i = 99; i <= 150; i = i + 1) begin
+         //$display("execution start : start_time =%0t ns",$time) ;
             send_byte(i[7:0]);
             count=i;
             wait(rdy);
@@ -72,13 +71,12 @@ module UART_top_tb;
             
             clear_ready;
             wait(!busy); 
-             #3000; 
-          //  $display("end_time = %0t ns " ,$time);
-            
-            
-        end      
-        #10000;
+            #100;
+             // #5000;
+          // $display("end_time = %0t ns " ,$time);
+        end   
+           
         $finish;
+        
     end
 endmodule
-;

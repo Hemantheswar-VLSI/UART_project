@@ -24,16 +24,35 @@ module baudrate_gen #(
                 $display("frequency : %d , braud rate : %d",CLK_FREQ,BAUD_RATE);
             end 
         else begin
+       /*
             // TX counter
-           /* if(counter_tx == (DIV_TX -1)) begin
+            if(counter_tx == (DIV_TX -1)) begin
                     counter_tx <= 0;
-                    enb_tx     <= 1'b1;
+                    enb_tx<=1'b1;
+                    
                 end 
             else begin
                 counter_tx <= counter_tx + 1'b1;
-                enb_tx     <= 1'b0;
+               enb_tx<=1'b0;
             end
-*/
+
+
+
+          // RX counter
+            if(counter_rx == (DIV_RX-1 )) begin
+                    counter_rx <= 0;
+                    enb_rx     <= 1'b1;
+                    end
+                   
+            else begin
+                    counter_rx <= counter_rx + 1'b1;
+                    enb_rx     <= 1'b0;
+                    
+                end
+        end
+  //   */  
+  
+ //     /*
             // RX counter
             if(counter_rx == (DIV_RX )) begin
                     counter_rx <= 0;
@@ -54,5 +73,7 @@ module baudrate_gen #(
                     enb_tx<=1'b0;
                 end
         end
+ //    */   
+        
     end
 endmodule

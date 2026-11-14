@@ -30,73 +30,78 @@ reg parity_check=1'b0;
             sample        <= 4'b0;
             index         <= 3'b0;
             temp_register <= 8'b0;
-        end else begin
-            if(rdy_clr) begin
-                rdy <= 1'b0;
             end
+        else begin
+                if(rdy_clr) begin
+                    rdy <= 1'b0;
+                    end
+                else begin
+                    rdy<=rdy;  //It shoudl assign its old value
+                    end
+            
             
             if(clk_en) begin
                 case(state)
                     start_state: begin
-                       
-                           
-                         
-                             if(rx == 1'b0) begin
+                        if(rx == 1'b0) begin
                                 sample <= 4'b0;
-                                
-                                    state  <= data_state;
-                                    index  <= 3'b0;
-                             end   
-                                
-                             
-                            else begin
+                                state  <= data_state;
+                                index  <= 3'b0;
+                                    end   
+                        else begin
                                 state<=start_state;
-                            
-                                end
-                        end
+                            end
+                      end
                     
                     data_state: begin
                         if(sample == 4'hF) begin
                             sample<= 4'b0;
                             if(index == 4'h8) begin
                                 if(parity_check==1'b1)
-                                begin
-                                state <= stop_state;
-                                parity_check<=1'b0;
-                                end   
+                                    begin
+                                    state <= stop_state;
+                                    parity_check<=1'b0;
+                                   
+                                    end   
                                 else begin
                                     parity_error=(^temp_register) ^ rx ;
-                                   // $display("temp : %b , parity : %b , Error : %b",^temp_register,rx,parity_error);
+                                    // $display("temp : %b , parity : %b , Error : %b",^temp_register,rx,parity_error);
                                     parity_check<=1'b1;
-                                     end
-                                end
-                              else begin
+                                    end
+                              end
+                            else begin
                                 temp_register[index] <= rx;
                                 $display(" BIT = %d ,rx : %b",index,rx);
                                 index <= index + 1'b1;
-                            end
-                        end else begin
+                                end
+                          end 
+                        else begin
                             sample <= sample + 1'b1;
                         end
                     end
 
                     stop_state: begin
                         if(sample == 4'hF) begin
-                            sample   <= 4'b0;
-                            state    <= start_state;
-                            if(rx == 1'b1) begin 
-                                data_out <= temp_register;
-                                rdy      <= 1'b1;
-                               
-                                $display("Transmission End");
-                                
-                            end
-                        end else begin
+                              sample   <= 4'b0;
+                              
+                                    if(rx == 1'b1) begin 
+                                        state    <= start_state;
+                                        data_out <= temp_register;
+                                        rdy<= 1'b1;
+                                        $display("Transmission End");
+                                        end
+                                     else begin
+                                        data_out <=data_out;
+                                        rdy<= 1'b0;
+                                        state<=stop_state;
+                                         end
+                              end
+                        else begin
                             sample <= sample + 1'b1;
-                        end
-                    end
+                            end
+                     end
 
-                    default: state <= start_state;
+                   default: state <= start_state;
                 endcase
             end
         end
